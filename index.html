@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #a4d7f4; /* Light blue for a softer background */
+            color: #212529; /* Keeping text in a readable dark grey */
             margin: 0;
             padding: 0;
         }
@@ -15,12 +16,13 @@
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* Keeping the container white for contrast */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #002366; /* Deep blue for headers */
         }
         .form-group {
             margin-bottom: 20px;
@@ -28,34 +30,39 @@
         label {
             display: block;
             margin-bottom: 5px;
+            color: #0056b3; /* Deep blue for labels */
         }
         input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
-            margin: 5px 0 10px 0;
+            margin-bottom: 10px;
             display: inline-block;
-            border: 1px solid #ccc;
+            border: 2px solid #0056b3; /* Deep blue border for input fields */
             border-radius: 4px;
+            box-sizing: border-box;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #001a4d; /* Vibrant blue for buttons */
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #000d24; /* A darker shade of the button color for hover */
         }
         .response {
             margin-top: 20px;
             padding: 20px;
-            background-color: #e0f7fa;
-            border: 1px solid #00acc1;
+            background-color: #e0f7fa; /* A very light blue for the response area, for soft contrast */
+            border: 1px solid #00acc1; /* A brighter blue for borders in the response area */
             border-radius: 4px;
+            color: #495057; /* Dark grey for text in the response area */
         }
     </style>
+
 </head>
 <body>
     <div class="container">
@@ -70,7 +77,7 @@
                 <input type="text" id="category" name="category" required>
             </div>
             <div class="form-group">
-                <label for="payer">Payer (optional, default 'Auto Predict'):</label>
+                <label for="payer">Payer (Optional, leave blank to predict):</label>
                 <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
             </div>
             <button type="submit">Add Expense</button>
