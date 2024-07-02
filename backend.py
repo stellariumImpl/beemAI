@@ -30,7 +30,7 @@ def predict_payer(expense_type, amount, data):
     print(historical_data)
     if not historical_data:
         return data[-1]['payer']
-    prompt = f"Here are previous expense payments {historical_data}. Given a new expense for {expense_type} costing ${amount}, who is the most possible person that will pay? Answer should be a single in the format: 'Name'. "
+    prompt = f"Here are previous expense payments {historical_data}. Given a new expense for {expense_type} costing ${amount}, who is the most possible person that will pay? Your answer must be a single in the format: 'Name'. "
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -82,15 +82,6 @@ def add_expense():
     return jsonify({'payer': payer, 'confirmed': True,
                     'message': thank_you_message})
 
-    # if not payer:
-    #     payer = predict_payer(expense_type, amount, data)
-    #     expense['payer'] = payer
-    # data.append(expense)
-    # save_data('expenses.json', data)
-    # thank_you_message = f"Thank you {payer}, for agreeing to pay the {expense_type} bill of ${amount}. We appreciate it!"
-    # thank_you_message = thank_you(thank_you_message)
-    #
-    # return jsonify({'message': thank_you_message})
 @app.route('/confirm_payment', methods=['POST'])
 def confirm_payment():
     data = request.json
@@ -102,23 +93,14 @@ def confirm_payment():
     amount = expenses[-1]['amount']
     # Assuming the last entry is the one to be confirmed
     if confirm:
+        expenses[-1]['payer'] = payer  # Assign new payer
         expenses[-1]['confirmed'] = True
 
         save_data('expenses.json', expenses)
         thank_you_message = f"Thank you {payer}, for agreeing to pay the {expense_type} bill of ${amount}. We appreciate it!"
         thank_you_message = thank_you(thank_you_message)
         return jsonify({'message': thank_you_message})
-    else:
-        new_payer = data.get('new_payer', '')  # Get new payer from the request
-        if new_payer:
-            expenses[-1]['payer'] = new_payer  # Assign new payer
-            expenses[-1]['confirmed'] = False  # Set as not confirmed
-            save_data('expenses.json', expenses)
-            return jsonify({'message': f"A new bill for {expense_type} costing ${amount} just came in. {payer}, would you like to pay this bill?", 'payer': new_payer})
-        else:
-            return jsonify({'message': 'Please specify who should pay instead.'})
-
-
+        
 # Static file serving
 @app.route('/')
 def serve_index():
