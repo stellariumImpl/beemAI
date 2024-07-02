@@ -1,0 +1,98 @@
+[
+    {
+        "type": "dining",
+        "amount": "88",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "10",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "15",
+        "payer": "Kate",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "14",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "56",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "56",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "45",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "32",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "45",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "100",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "21",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "45",
+        "payer": "Tom",
+        "confirmed": true
+    }
+]
