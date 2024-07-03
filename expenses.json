@@ -94,5 +94,137 @@
         "amount": "45",
         "payer": "Tom",
         "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "34",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "transport",
+        "amount": "67",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "transport",
+        "amount": "54",
+        "payer": "Jessie",
+        "confirmed": true
+    },
+    {
+        "type": "rent",
+        "amount": "533",
+        "payer": "Michael",
+        "confirmed": true
+    },
+    {
+        "type": "rent",
+        "amount": "676",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "12",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "15",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "34",
+        "payer": "${data.payer}",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "34",
+        "payer": "Tom",
+        "confirmed": false
+    },
+    {
+        "type": "groceries",
+        "amount": "56",
+        "payer": "John",
+        "confirmed": false
+    },
+    {
+        "type": "dining",
+        "amount": "56",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "76",
+        "payer": "Mike",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "89",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "transport",
+        "amount": "24",
+        "payer": "John",
+        "confirmed": true
+    },
+    {
+        "type": "transport",
+        "amount": "25",
+        "payer": "Mike",
+        "confirmed": true
+    },
+    {
+        "type": "rent",
+        "amount": "90",
+        "payer": "Mike",
+        "confirmed": true
+    },
+    {
+        "type": "rent",
+        "amount": "90",
+        "payer": "Kate",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "56",
+        "payer": "Tom",
+        "confirmed": true
+    },
+    {
+        "type": "groceries",
+        "amount": "76",
+        "payer": "Mike",
+        "confirmed": true
+    },
+    {
+        "type": "dining",
+        "amount": "56",
+        "payer": "Jessie",
+        "confirmed": true
+    },
+    {
+        "type": "movie",
+        "amount": "78",
+        "payer": "John",
+        "confirmed": true
     }
 ]
