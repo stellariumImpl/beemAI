@@ -3,26 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Expense Sharer</title>
+    <title>Family Expense Splitter</title>
     <style>
+        /* Basic styles for body including font, background color, and text color */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #a4d7f4; /* Light blue for a softer background */
-            color: #212529; /* Keeping text in a readable dark grey */
+            font-family: Inter, sans-serif;
+            background-color: #2e08ab;
+            color: #212529;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff; /* Keeping the container white for contrast */
+        /* Main container to split the page into two sections */
+        .main-container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px;
+            background-color: #ffffff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            overflow: hidden;
         }
-        h1 {
+        /* Left section styles */
+        .left-section {
+            background-color: #f2c96f;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .left-section img {
+            max-width: 100%;
+            height: auto;
+        }
+        .left-section h2 {
+            color: #2e08ab;
+        }
+        .left-section p {
+            color: #2e08ab;
+            font-size: 24px;
             text-align: center;
-            color: #002366; /* Deep blue for headers */
+        }
+        /* Right section styles */
+        .right-section {
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .right-section h1 {
+            text-align: center;
+            color: #002366;
         }
         .form-group {
             margin-bottom: 20px;
@@ -30,19 +67,18 @@
         label {
             display: block;
             margin-bottom: 5px;
-            color: #0056b3; /* Deep blue for labels */
+            color: #0056b3;
         }
         input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
-            display: inline-block;
-            border: 2px solid #0056b3; /* Deep blue border for input fields */
+            border: 2px solid #0056b3;
             border-radius: 4px;
             box-sizing: border-box;
         }
         button {
-            background-color: #001a4d; /* Vibrant blue for buttons */
+            background-color: #001a4d;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -51,92 +87,107 @@
             width: 100%;
         }
         button:hover {
-            background-color: #000d24; /* A darker shade of the button color for hover */
+            background-color: #000d24;
         }
         .response {
             margin-top: 20px;
             padding: 20px;
-            background-color: #e0f7fa; /* A very light blue for the response area, for soft contrast */
-            border: 1px solid #00acc1; /* A brighter blue for borders in the response area */
+            background-color: #ffffff;
+            border: 0px solid #2e08ab;
             border-radius: 4px;
-            color: #495057; /* Dark grey for text in the response area */
+            color: #495057;
         }
     </style>
-
 </head>
 <body>
-    <div class="container">
-        <h1>Family Expense Sharer</h1>
-        <form id="expense-form">
-            <div class="form-group">
-                <label for="amount">Amount ($):</label>
-                <input type="number" id="amount" name="amount" required>
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <input type="text" id="category" name="category" required>
-            </div>
-            <div class="form-group">
-                <label for="payer">Payer (Optional, leave blank to predict):</label>
-                <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
-            </div>
-            <button type="submit">Add Expense</button>
-        </form>
-        <div class="response" id="response"></div>
+    <div class="main-container">
+        <div class="left-section">
+            <img src="mates-with-eyes.png" alt="Illustration">
+            <h2>Beem</h2>
+            <p>Let beem split your bills, not quarrel.</p>
+        </div>
+        <div class="right-section">
+            <h1>Family Expense Splitter</h1>
+            <form id="expense-form">
+                <div class="form-group">
+                    <label for="amount">Amount ($):</label>
+                    <input type="number" id="amount" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="payer">Payer (Optional, leave blank to predict):</label>
+                    <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
+                </div>
+                <button type="submit">Add Expense</button>
+            </form>
+            <div class="response" id="response"></div>
+        </div>
     </div>
-
     <script>
+        // Attach an event listener to the expense form submission
         document.getElementById('expense-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const amount = document.getElementById('amount').value;
-            const category = document.getElementById('category').value;
-            let payer = document.getElementById('payer').value;
+            event.preventDefault();  // Prevent default form submission to handle via JavaScript
+            const amount = document.getElementById('amount').value; // Get amount value from form
+            const category = document.getElementById('category').value; // Get category value from form
+            let payer = document.getElementById('payer').value; // Get payer value from form
 
-            // Check if payer is empty and set default text
+            // Set payer to empty string if field is blank to handle server-side
             if (payer.trim() === '') {
-                payer = ''; // You could also leave it empty and let the server handle it.
+                payer = '';
             }
 
+            // Send a POST request to the server to add an expense
             fetch('/add_expense', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ amount, category, payer })
+                body: JSON.stringify({ amount, category, payer }) // Send form data as JSON
             })
             .then(response => response.json())
             .then(data => {
+                // Display different responses based on server data
                 if (!data.confirmed) {
-                    document.getElementById('response').innerHTML = `${data.message} <button onclick="confirmPayment('${data.payer}', true)">Yes</button> <button onclick="confirmPayment('${data.payer}', false)">No, I won't pay</button>`;
+                    // Ask for confirmation from the payer
+                    document.getElementById('response').innerHTML = `${data.message} ${data.payer}, would you like to pay this bill? <button onclick="confirmPayment('${data.message}', '${data.payer}', true)">Yes</button> <button onclick="confirmPayment('${data.message}', '${data.payer}', false)">No, I won't pay</button>`;
                 } else {
+                    // Show a success message if confirmed
                     document.getElementById('response').textContent = data.message;
                 }
             })
             .catch(error => {
+                // Handle errors and display them in the response container
                 document.getElementById('response').textContent = 'Error: ' + error.message;
             });
         });
 
-    function confirmPayment(payer, confirm) {
+        // Function to confirm payment based on user interaction
+        function confirmPayment(bill, payer, confirm) {
         if (!confirm) {
             const newPayer = prompt("Who should pay instead?");
-            if (newPayer) {
-                confirm = true;  // Assuming the new payer will confirm
-                payer = newPayer;  // Assigning new payer
+            if (newPayer && newPayer.trim() !== '') {
+                // Ask for confirmation from the new payer
+                document.getElementById('response').innerHTML = `${bill} ${newPayer}, would you like to pay this bill? <button onclick="confirmPayment('${bill}', '${newPayer}', true)">Yes</button> <button onclick="confirmPayment('${bill}', '${newPayer}', false)">No, I won't pay</button>`;
+            } else if (!newPayer || newPayer.trim() === '') {
+                alert('No new payer was specified, please provide a name.');
             }
+        } else {
+            fetch('/confirm_payment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ payer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').textContent = data.message;
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            });
         }
-
-        fetch('/confirm_payment', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ payer, confirm })
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('response').textContent = data.message;
-        })
-        .catch(error => {
-            document.getElementById('response').textContent = 'Error: ' + error.message;
-        });
     }
     </script>
 </body>
 </html>
+
