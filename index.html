@@ -17,6 +17,7 @@
             align-items: center;
             height: 100vh;
         }
+
         /* Main container to split the page into two sections */
         .main-container {
             display: flex;
@@ -27,6 +28,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         /* Left section styles */
         .left-section {
             background-color: #f2c96f;
@@ -37,18 +39,22 @@
             justify-content: center;
             align-items: center;
         }
+
         .left-section img {
             max-width: 100%;
             height: auto;
         }
+
         .left-section h2 {
             color: #2e08ab;
         }
+
         .left-section p {
             color: #2e08ab;
             font-size: 24px;
             text-align: center;
         }
+
         /* Right section styles */
         .right-section {
             padding: 40px;
@@ -57,18 +63,22 @@
             flex-direction: column;
             justify-content: center;
         }
+
         .right-section h1 {
             text-align: center;
             color: #002366;
         }
+
         .form-group {
             margin-bottom: 20px;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
             color: #0056b3;
         }
+
         input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
@@ -77,6 +87,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         button {
             background-color: #001a4d;
             color: white;
@@ -86,9 +97,11 @@
             cursor: pointer;
             width: 100%;
         }
+
         button:hover {
             background-color: #000d24;
         }
+
         .response {
             margin-top: 20px;
             padding: 20px;
@@ -100,83 +113,89 @@
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="left-section">
-            <img src="mates-with-eyes.png" alt="Illustration">
-            <h2>Beem</h2>
-            <p>Let beem split your bills, not quarrel.</p>
-        </div>
-        <div class="right-section">
-            <h1>Family Expense Splitter</h1>
-            <form id="expense-form">
-                <div class="form-group">
-                    <label for="amount">Amount ($):</label>
-                    <input type="number" id="amount" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <input type="text" id="category" name="category" required>
-                </div>
-                <div class="form-group">
-                    <label for="payer">Payer (Optional, leave blank to predict):</label>
-                    <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
-                </div>
-                <button type="submit">Add Expense</button>
-            </form>
-            <div class="response" id="response"></div>
-        </div>
+<div class="main-container">
+    <div class="left-section">
+        <img src="mates-with-eyes.png" alt="Illustration">
+        <h2>Beem</h2>
+        <p>Let beem split your bills, not quarrel.</p>
     </div>
-    <script>
-        // Attach an event listener to the expense form submission
-        document.getElementById('expense-form').addEventListener('submit', function(event) {
-            event.preventDefault();  // Prevent default form submission to handle via JavaScript
-            const amount = document.getElementById('amount').value; // Get amount value from form
-            const category = document.getElementById('category').value; // Get category value from form
-            let payer = document.getElementById('payer').value; // Get payer value from form
+    <div class="right-section">
+        <h1>Family Expense Splitter</h1>
+        <form id="expense-form">
+            <div class="form-group">
+                <label for="amount">Amount ($):</label>
+                <input type="number" id="amount" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" required>
+            </div>
+            <div class="form-group">
+                <label for="payer">Payer (Optional, leave blank to predict):</label>
+                <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
+            </div>
+            <button type="submit">Add Expense</button>
+        </form>
+        <div class="response" id="response"></div>
+    </div>
+</div>
+<script>
+    // Global variables to store the sorted payers list and current state
+    let sortedPayers = [];
+    let currentPayerIndex = 0;
+    let currentBill = '';
 
-            // Set payer to empty string if field is blank to handle server-side
-            if (payer.trim() === '') {
-                payer = '';
+    // Attach an event listener to the expense form submission
+    document.getElementById('expense-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const amount = document.getElementById('amount').value;
+        const category = document.getElementById('category').value;
+        let payer = document.getElementById('payer').value.trim();
+
+        addExpense(amount, category, payer);
+    });
+
+    // Function to add a new expense
+    function addExpense(amount, category, payer) {
+        fetch('/add_expense', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({amount, category, payer})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.confirmed) {
+                document.getElementById('response').textContent = data.message;
+            } else {
+                sortedPayers = data.sorted_payers || [];
+                currentPayerIndex = 0;
+                currentBill = `A new bill for ${category} costing $${amount} just came in.`;
+                askNextPayer();
             }
-
-            // Send a POST request to the server to add an expense
-            fetch('/add_expense', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ amount, category, payer }) // Send form data as JSON
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display different responses based on server data
-                if (!data.confirmed) {
-                    // Ask for confirmation from the payer
-                    document.getElementById('response').innerHTML = `${data.message} ${data.payer}, would you like to pay this bill? <button onclick="confirmPayment('${data.message}', '${data.payer}', true)">Yes</button> <button onclick="confirmPayment('${data.message}', '${data.payer}', false)">No, I won't pay</button>`;
-                } else {
-                    // Show a success message if confirmed
-                    document.getElementById('response').textContent = data.message;
-                }
-            })
-            .catch(error => {
-                // Handle errors and display them in the response container
-                document.getElementById('response').textContent = 'Error: ' + error.message;
-            });
+        })
+        .catch(error => {
+            document.getElementById('response').textContent = 'Error: ' + error.message;
         });
+    }
 
-        // Function to confirm payment based on user interaction
-        function confirmPayment(bill, payer, confirm) {
-        if (!confirm) {
-            const newPayer = prompt("Who should pay instead?");
-            if (newPayer && newPayer.trim() !== '') {
-                // Ask for confirmation from the new payer
-                document.getElementById('response').innerHTML = `${bill} ${newPayer}, would you like to pay this bill? <button onclick="confirmPayment('${bill}', '${newPayer}', true)">Yes</button> <button onclick="confirmPayment('${bill}', '${newPayer}', false)">No, I won't pay</button>`;
-            } else if (!newPayer || newPayer.trim() === '') {
-                alert('No new payer was specified, please provide a name.');
-            }
+    // Function to ask the next payer
+    function askNextPayer() {
+        if (currentPayerIndex < sortedPayers.length) {
+            const payer = sortedPayers[currentPayerIndex];
+            document.getElementById('response').innerHTML = `${currentBill} ${payer}, would you like to pay this bill? <button onclick="confirmPayment(true)">Yes</button> <button onclick="confirmPayment(false)">No, I won't pay</button>`;
         } else {
+            document.getElementById('response').textContent = 'All potential payers have declined. Consider splitting the bill.';
+        }
+    }
+
+    // Function to confirm payment based on user interaction
+    function confirmPayment(confirm) {
+        if (confirm) {
+            const payer = sortedPayers[currentPayerIndex];
             fetch('/confirm_payment', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ payer })
+                body: JSON.stringify({payer})
             })
             .then(response => response.json())
             .then(data => {
@@ -185,9 +204,12 @@
             .catch(error => {
                 document.getElementById('response').textContent = 'Error: ' + error.message;
             });
+        } else {
+            currentPayerIndex++;
+            askNextPayer();
         }
     }
-    </script>
+</script>
 </body>
 </html>
 
