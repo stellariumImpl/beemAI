@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [
     {
         "type": "dining",
@@ -228,3 +229,6 @@
         "confirmed": true
     }
 ]
+=======
+[{"type": "movie", "amount": 1000, "payer": "ali", "confirmed": true}, {"type": "movie", "amount": 1000, "payer": "Ali", "confirmed": false}, {"type": "gym", "amount": 1000, "payer": "ali", "confirmed": false}, {"type": "gym", "amount": 100, "payer": "ali", "confirmed": false}, {"type": "shopping", "amount": 1000, "payer": "ali", "confirmed": true}, {"type": "gym", "amount": 56, "payer": "ali", "confirmed": false}, {"type": "education", "amount": 1000, "payer": "ali", "confirmed": true}]
+>>>>>>> d92623c (recent modified 7th July)

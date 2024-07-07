@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +18,7 @@
             align-items: center;
             height: 100vh;
         }
+
         /* Main container to split the page into two sections */
         .main-container {
             display: flex;
@@ -27,6 +29,7 @@
             border-radius: 16px;
             overflow: hidden;
         }
+
         /* Left section styles */
         .left-section {
             background-color: #f2c96f;
@@ -37,18 +40,22 @@
             justify-content: center;
             align-items: center;
         }
+
         .left-section img {
             max-width: 100%;
             height: auto;
         }
+
         .left-section h2 {
             color: #2e08ab;
         }
+
         .left-section p {
             color: #2e08ab;
             font-size: 24px;
             text-align: center;
         }
+
         /* Right section styles */
         .right-section {
             padding: 40px;
@@ -58,11 +65,13 @@
             justify-content: center;
             align-items: center;
         }
+
         .right-section h1 {
             text-align: center;
             color: #002366;
             margin-bottom: 40px;
         }
+
         .form-group {
             width: 100%;
             margin-bottom: 20px;
@@ -70,11 +79,13 @@
             flex-direction: column;
             align-items: center;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
             color: #0056b3;
         }
+
         input[type="text"], input[type="number"], select {
             width: 80%;
             padding: 15px;
@@ -85,6 +96,7 @@
             font-size: 16px;
             text-align: center;
         }
+
         button {
             width: 80%;
             background-color: #001a4d;
@@ -97,9 +109,11 @@
             margin-top: 10px;
             text-align: center;
         }
+
         button:hover {
             background-color: #000d24;
         }
+
         .response {
             width: 80%;
             margin-top: 20px;
@@ -128,6 +142,105 @@
     </style>
 </head>
 <body>
+
+<div class="main-container">
+    <div class="left-section">
+        <img src="mates-with-eyes.png" alt="Illustration">
+        <h2>Beem</h2>
+        <p>Let beem split your bills, not quarrel.</p>
+    </div>
+    <div class="right-section">
+        <h1>Family Expense Splitter</h1>
+        <form id="expense-form">
+            <div class="form-group">
+                <label for="amount">Amount ($):</label>
+                <input type="number" id="amount" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" required>
+            </div>
+            <div class="form-group">
+                <label for="payer">Payer (Optional, leave blank to predict):</label>
+                <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
+            </div>
+            <button type="submit">Add Expense</button>
+        </form>
+        <div class="response" id="response"></div>
+    </div>
+</div>
+<script>
+    // Global variables to store the sorted payers list and current state
+    let sortedPayers = [];
+    let currentPayerIndex = 0;
+    let currentBill = '';
+
+    // Attach an event listener to the expense form submission
+    document.getElementById('expense-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const amount = document.getElementById('amount').value;
+        const category = document.getElementById('category').value;
+        let payer = document.getElementById('payer').value.trim();
+
+        addExpense(amount, category, payer);
+    });
+
+    // Function to add a new expense
+    function addExpense(amount, category, payer) {
+        fetch('/add_expense', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({amount, category, payer})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.confirmed) {
+                document.getElementById('response').textContent = data.message;
+            } else {
+                sortedPayers = data.sorted_payers || [];
+                currentPayerIndex = 0;
+                currentBill = `A new bill for ${category} costing $${amount} just came in.`;
+                askNextPayer();
+            }
+        })
+        .catch(error => {
+            document.getElementById('response').textContent = 'Error: ' + error.message;
+        });
+    }
+
+    // Function to ask the next payer
+    function askNextPayer() {
+        if (currentPayerIndex < sortedPayers.length) {
+            const payer = sortedPayers[currentPayerIndex];
+            document.getElementById('response').innerHTML = `${currentBill} ${payer}, would you like to pay this bill? <button onclick="confirmPayment(true)">Yes</button> <button onclick="confirmPayment(false)">No, I won't pay</button>`;
+        } else {
+            document.getElementById('response').textContent = 'All potential payers have declined. Consider splitting the bill.';
+        }
+    }
+
+    // Function to confirm payment based on user interaction
+    function confirmPayment(confirm) {
+        if (confirm) {
+            const payer = sortedPayers[currentPayerIndex];
+            fetch('/confirm_payment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({payer})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').textContent = data.message;
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            });
+        } else {
+            currentPayerIndex++;
+            askNextPayer();
+        }
+    }
+</script>
+
     <div class="main-container">
         <div class="left-section">
             <img src="mates-with-eyes.png" alt="Illustration">
@@ -209,6 +322,158 @@
             }
         }
     </script>
+
 </body>
 </html>
+
+
+import React, { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const FamilyExpenseSharer = () => {
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
+  const [payer, setPayer] = useState('');
+  const [response, setResponse] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/add_expense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, category, payer }),
+      });
+      const data = await res.json();
+      setResponse(data);
+    } catch (err) {
+      setError('An error occurred while submitting the expense.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmPayment = async (confirm, newPayer = null) => {
+    if (!confirm && (!newPayer || newPayer.trim() === '')) {
+      alert('No new payer was specified, please provide a name.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/confirm_payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payer: confirm ? response.payer : newPayer }),
+      });
+      const data = await res.json();
+      setResponse(data);
+    } catch (err) {
+      setError('An error occurred while confirming the payment.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-purple-800">
+      <div className="flex w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="w-1/2 bg-yellow-300 p-8 flex flex-col justify-center items-center">
+          <img src="/api/placeholder/400/300" alt="Illustration" className="max-w-full h-auto" />
+          <h2 className="text-3xl font-bold text-purple-800 mt-4">Beem</h2>
+          <p className="text-xl text-purple-800 text-center mt-2">Let Beem split your bills, not quarrel.</p>
+        </div>
+        <div className="w-1/2 p-8 flex flex-col justify-center items-center">
+          <h1 className="text-3xl font-bold text-blue-900 mb-8">Family Expense Sharer</h1>
+          <form onSubmit={handleSubmit} className="w-full max-w-md">
+            <div className="mb-4">
+              <label htmlFor="amount" className="block text-blue-600 mb-1">Amount ($):</label>
+              <input
+                type="number"
+                id="amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="category" className="block text-blue-600 mb-1">Category:</label>
+              <input
+                type="text"
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="payer" className="block text-blue-600 mb-1">Payer (Optional, leave blank to predict):</label>
+              <input
+                type="text"
+                id="payer"
+                value={payer}
+                onChange={(e) => setPayer(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                placeholder="Leave blank to predict"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-900 text-white p-3 rounded-full hover:bg-blue-950 transition duration-300"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Adding...' : 'Add Expense'}
+            </button>
+          </form>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {response && (
+            <div className="mt-6 p-4 bg-white border-2 border-purple-800 rounded-xl text-center">
+              <p>{response.message}</p>
+              {!response.confirmed && (
+                <div className="mt-4">
+                  <p>{response.payer}, would you like to pay this bill?</p>
+                  <div className="flex justify-center gap-4 mt-2">
+                    <button
+                      onClick={() => confirmPayment(true)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition duration-300"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newPayer = prompt("Who should pay instead?");
+                        confirmPayment(false, newPayer);
+                      }}
+                      className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300"
+                    >
+                      No, I won't pay
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FamilyExpenseSharer;
 
