@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -213,3 +214,154 @@
 </body>
 </html>
 
+=======
+import React, { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const FamilyExpenseSharer = () => {
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
+  const [payer, setPayer] = useState('');
+  const [response, setResponse] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/add_expense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, category, payer }),
+      });
+      const data = await res.json();
+      setResponse(data);
+    } catch (err) {
+      setError('An error occurred while submitting the expense.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmPayment = async (confirm, newPayer = null) => {
+    if (!confirm && (!newPayer || newPayer.trim() === '')) {
+      alert('No new payer was specified, please provide a name.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/confirm_payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payer: confirm ? response.payer : newPayer }),
+      });
+      const data = await res.json();
+      setResponse(data);
+    } catch (err) {
+      setError('An error occurred while confirming the payment.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-purple-800">
+      <div className="flex w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="w-1/2 bg-yellow-300 p-8 flex flex-col justify-center items-center">
+          <img src="/api/placeholder/400/300" alt="Illustration" className="max-w-full h-auto" />
+          <h2 className="text-3xl font-bold text-purple-800 mt-4">Beem</h2>
+          <p className="text-xl text-purple-800 text-center mt-2">Let Beem split your bills, not quarrel.</p>
+        </div>
+        <div className="w-1/2 p-8 flex flex-col justify-center items-center">
+          <h1 className="text-3xl font-bold text-blue-900 mb-8">Family Expense Sharer</h1>
+          <form onSubmit={handleSubmit} className="w-full max-w-md">
+            <div className="mb-4">
+              <label htmlFor="amount" className="block text-blue-600 mb-1">Amount ($):</label>
+              <input
+                type="number"
+                id="amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="category" className="block text-blue-600 mb-1">Category:</label>
+              <input
+                type="text"
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="payer" className="block text-blue-600 mb-1">Payer (Optional, leave blank to predict):</label>
+              <input
+                type="text"
+                id="payer"
+                value={payer}
+                onChange={(e) => setPayer(e.target.value)}
+                className="w-full p-3 border-2 border-blue-600 rounded-full text-center"
+                placeholder="Leave blank to predict"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-900 text-white p-3 rounded-full hover:bg-blue-950 transition duration-300"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Adding...' : 'Add Expense'}
+            </button>
+          </form>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {response && (
+            <div className="mt-6 p-4 bg-white border-2 border-purple-800 rounded-xl text-center">
+              <p>{response.message}</p>
+              {!response.confirmed && (
+                <div className="mt-4">
+                  <p>{response.payer}, would you like to pay this bill?</p>
+                  <div className="flex justify-center gap-4 mt-2">
+                    <button
+                      onClick={() => confirmPayment(true)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition duration-300"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newPayer = prompt("Who should pay instead?");
+                        confirmPayment(false, newPayer);
+                      }}
+                      className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300"
+                    >
+                      No, I won't pay
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FamilyExpenseSharer;
+>>>>>>> d92623c (recent modified 7th July)
