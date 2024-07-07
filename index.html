@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Expense Splitter</title>
+    <title>Family Expense Sharer</title>
     <style>
         /* Basic styles for body including font, background color, and text color */
         body {
@@ -26,7 +26,7 @@
             max-width: 1200px;
             background-color: #ffffff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            border-radius: 16px;
             overflow: hidden;
         }
 
@@ -63,15 +63,21 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
         }
 
         .right-section h1 {
             text-align: center;
             color: #002366;
+            margin-bottom: 40px;
         }
 
         .form-group {
+            width: 100%;
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         label {
@@ -81,22 +87,27 @@
         }
 
         input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 10px;
+            width: 80%;
+            padding: 15px;
             margin-bottom: 10px;
             border: 2px solid #0056b3;
-            border-radius: 4px;
+            border-radius: 24px;
             box-sizing: border-box;
+            font-size: 16px;
+            text-align: center;
         }
 
         button {
+            width: 80%;
             background-color: #001a4d;
             color: white;
-            padding: 10px 20px;
+            padding: 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 24px;
             cursor: pointer;
-            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: center;
         }
 
         button:hover {
@@ -104,16 +115,34 @@
         }
 
         .response {
+            width: 80%;
             margin-top: 20px;
             padding: 20px;
             background-color: #ffffff;
             border: 0px solid #2e08ab;
-            border-radius: 4px;
+            border-radius: 24px;
             color: #495057;
+            text-align: center;
+        }
+        .response button {
+            width: calc(80% - 20px);
+            background-color: #001a4d;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .response button:hover {
+            background-color: #000d24;
         }
     </style>
 </head>
 <body>
+
 <div class="main-container">
     <div class="left-section">
         <img src="mates-with-eyes.png" alt="Illustration">
@@ -211,10 +240,93 @@
         }
     }
 </script>
+
+    <div class="main-container">
+        <div class="left-section">
+            <img src="mates-with-eyes.png" alt="Illustration">
+            <h2>Beem</h2>
+            <p>Let Beem split your bills, not quarrel.</p>
+        </div>
+        <div class="right-section">
+            <h1>Family Expense Sharer</h1>
+            <form id="expense-form">
+                <div class="form-group">
+                    <label for="amount">Amount ($):</label>
+                    <input type="number" id="amount" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="payer">Payer (Optional, leave blank to predict):</label>
+                    <input type="text" id="payer" name="payer" placeholder="Leave blank to predict">
+                </div>
+                <div class="form-group">
+                    <button type="submit">Add Expense</button>
+                </div>
+            </form>
+            <div class="response" id="response"></div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('expense-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const amount = document.getElementById('amount').value;
+            const category = document.getElementById('category').value;
+            let payer = document.getElementById('payer').value;
+
+            if (payer.trim() === '') {
+                payer = '';
+            }
+
+            fetch('/add_expense', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ amount, category, payer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.confirmed) {
+                    document.getElementById('response').innerHTML = `${data.message} ${data.payer}, would you like to pay this bill? <button onclick="confirmPayment('${data.message}', '${data.payer}', true)">Yes</button> <button onclick="confirmPayment('${data.message}', '${data.payer}', false)">No, I won't pay</button>`;
+                } else {
+                    document.getElementById('response').textContent = data.message;
+                }
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            });
+        });
+
+        function confirmPayment(bill, payer, confirm) {
+            if (!confirm) {
+                const newPayer = prompt("Who should pay instead?");
+                if (newPayer && newPayer.trim() !== '') {
+                    document.getElementById('response').innerHTML = `${bill} ${newPayer}, would you like to pay this bill? <button onclick="confirmPayment('${bill}', '${newPayer}', true)">Yes</button> <button onclick="confirmPayment('${bill}', '${newPayer}', false)">No, I won't pay</button>`;
+                } else if (!newPayer || newPayer.trim() === '') {
+                    alert('No new payer was specified, please provide a name.');
+                }
+            } else {
+                fetch('/confirm_payment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ payer })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').textContent = data.message;
+                })
+                .catch(error => {
+                    document.getElementById('response').textContent = 'Error: ' + error.message;
+                });
+            }
+        }
+    </script>
+
 </body>
 </html>
 
-=======
+
 import React, { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -364,4 +476,4 @@ const FamilyExpenseSharer = () => {
 };
 
 export default FamilyExpenseSharer;
->>>>>>> d92623c (recent modified 7th July)
+
